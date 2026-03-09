@@ -1,0 +1,29 @@
+FROM pytorch/pytorch:2.10.0-cuda12.8-cudnn9-runtime
+
+# Set a working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    python3-pip \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy inference app, model, and checkpoint
+COPY inference_bandwidth_prediction.py ./
+COPY models.py ./
+COPY loss.py ./
+COPY utility.py ./
+COPY Uplink-Bandwidth-Prediction/e24eeda9/checkpoints/epoch=10-step=11803-val_loss=0.095.ckpt ./Uplink-Bandwidth-Prediction/e24eeda9/checkpoints/
+COPY mqtt_config.py ./
+
+# Copy scaler files
+COPY scaler-save/prediction_bandwidth/e24eeda9/scaler_label.gz ./scaler-save/prediction_bandwidth/e24eeda9/
+COPY scaler-save/prediction_bandwidth/e24eeda9/scaler_input.gz ./scaler-save/prediction_bandwidth/e24eeda9/
+
+# Copy requirements and install
+COPY requirements-inference.txt ./
+RUN pip install -r requirements-inference.txt --break-system-packages
+
+# Set the default command (modify as needed)
+CMD ["python3", "inference_bandwidth_prediction.py"]

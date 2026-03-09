@@ -66,7 +66,7 @@ def train(config):
     callbacks = []
     callbacks.append(EarlyStopping(
         monitor='val_loss', 
-        patience=5,
+        patience=15,
         verbose=True, 
         strict=True))
     callbacks.append(ModelCheckpoint(
@@ -210,7 +210,7 @@ config = dict(
     num_linear_layers=2,
     dropout_rnn=0.1, # 0.1
     dropout_linear=0.1, # 0.1
-    learning_rate=0.001,
+    learning_rate=0.0001,
     criterion='ARULossHO', # MSELoss, L1Loss, QuantileLoss, ARULoss, HybridARULoss
 
     penalty_over=4.0,
@@ -233,9 +233,9 @@ config = dict(
     persistent_workers=True,
     PARQUET = False, # True, False
     # 6-2-2 Train-Val-Test Split 
-    train_p=0.6,
-    val_p=0.2,
-    test_p=0.2,
+    train_p=0.8,
+    val_p=0.1,
+    test_p=0.1,
 
     # Directories
     working_dir='./',
@@ -262,8 +262,8 @@ if __name__ == '__main__':
     parser.add_argument('-model_type', type=str, default='LSTM')
     parser.add_argument('-pred_len', type=int, default=1) # Number of steps to make predictions
     parser.add_argument('-seq_len', type=int, default=16)
-    parser.add_argument('-batch_size', type=int, default=32)
-    parser.add_argument('-max_epochs', type=int, default=1) # 1, 1000
+    parser.add_argument('-batch_size', type=int, default=128)
+    parser.add_argument('-max_epochs', type=int, default=1000) # 1, 1000
     parser.add_argument('-inverse', type=bool, default=True)
     parser.add_argument('-dataset', type=str, default='Fjord5G-4329-uplink') # Fjord5G-4329-uplink, SURE-uplink, UplinkNet-uplink
     parser.add_argument('-gpu', type=int, default=0) # 0, 1

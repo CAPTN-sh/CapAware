@@ -163,6 +163,10 @@ class HandoverDataModule(pl.LightningDataModule):
             self.file_path = './data/CAU-4312-Fjord5G-handovers-processed.parquet.gzip'
             self.inputs = ['speedkmh', 'lRsrp', 'lSinr', 'lCqi'] # GPS speed + signal strength
             self.outputs = ['Handover']
+        elif self.dataset == '2025-5G-SA':
+            self.file_path = './data/handover-prediction-2025-5G-SA-all-processed.parquet.gzip'
+            self.inputs = ['speedkmh', 'lRsrp', 'lSinr', 'lCqi'] # GPS speed + signal strength
+            self.outputs = ['Handover']
         else:
             print("Unknown dataset")
 

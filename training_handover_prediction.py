@@ -70,7 +70,7 @@ def train(config):
     print('Training time: {} s'.format(time.time()-start))
 
     # save checkpoint
-    ckpt_path = "CapAwareHandoverPredictor.ckpt"
+    ckpt_path = f"CapAwareHandoverPredictor-{config['eval_model']}.ckpt"
     trainer.save_checkpoint(ckpt_path)
 
     if config['model'] == 'CapAwareHandoverPredictor':
@@ -210,7 +210,7 @@ config = dict(
     max_epochs=1,
     negative_ratio=1.0,
     balance_data=True,  # Set to False to disable balancing
-    dataset='Fjord5G-4312',
+    dataset='2025-5G-SA',
 )
 
 config_predict = dict(
@@ -227,7 +227,7 @@ config_predict = dict(
     max_epochs=1,
     negative_ratio=1.0,
     balance_data=False,  # Set to False to disable balancing
-    dataset='Fjord5G-4312', # you can use other routers from Fjord5G dataset
+    dataset='2025-5G-SA', # you can use other routers from Fjord5G dataset
 )
 
 if __name__ == '__main__':
@@ -236,7 +236,7 @@ if __name__ == '__main__':
         prog='prediction',
         description='Training a Handover Prediction model')
 
-    parser.add_argument('-max_epochs', type=int, default=1)
+    parser.add_argument('-max_epochs', type=int, default=1000)
     parser.add_argument('-gpu', type=int, default=0) # 0, 1
     
     args = parser.parse_args()

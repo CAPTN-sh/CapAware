@@ -379,7 +379,7 @@ class Perceive(pl.LightningModule):
 
         schedulers = {
             'StepLR': torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.9),
-            'ReduceLROnPlateau': torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=5, factor=0.5)
+            'ReduceLROnPlateau': torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=4, factor=0.5)
         }
         scheduler = schedulers.get(
             self.lr_scheduler, schedulers['ReduceLROnPlateau'])

@@ -1,0 +1,29 @@
+FROM pytorch/pytorch:2.10.0-cuda12.8-cudnn9-runtime
+
+# Set a working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    python3-pip \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy inference app, model, and checkpoint
+COPY inference_handover_prediction.py ./
+COPY models.py ./
+COPY loss.py ./
+COPY utility.py ./
+COPY Handover-Prediction/19vu2hl8/checkpoints/epoch=89-step=1130400-val_loss=0.119.ckpt ./Handover-Prediction/19vu2hl8/checkpoints/
+COPY mqtt_config.py ./
+
+# Copy scaler files
+COPY scaler-save/prediction_handover/19vu2hl8/scaler_label.gz ./scaler-save/prediction_handover/19vu2hl8/
+COPY scaler-save/prediction_handover/19vu2hl8/scaler_feature.gz ./scaler-save/prediction_handover/19vu2hl8/
+
+# Copy requirements and install
+COPY requirements-inference.txt ./
+RUN pip install -r requirements-inference.txt --break-system-packages
+
+# Set the default command (modify as needed)
+CMD ["python3", "inference_handover_prediction.py"]

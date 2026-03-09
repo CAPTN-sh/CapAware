@@ -1,0 +1,11 @@
+torch
+joblib
+pandas
+numpy
+paho-mqtt
+torchmetrics
+lightning
+scikit-learn
+matplotlib
+seaborn
+wandb
