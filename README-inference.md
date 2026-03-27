@@ -50,6 +50,7 @@ docker build -t birkan-bandwidth-prediction . -f Dockerfile-bandwidth-prediction
 ```
 docker run -d \
   --gpus all \
+  --name CAU-R16-4312 \
   --env router=CAU-R16-4312 \
   --restart unless-stopped \
   birkan-bandwidth-prediction
@@ -58,6 +59,34 @@ docker run -d \
 ```
 docker run -d \
   --gpus all \
+  --name CAU-R16-4329 \
+  --env router=CAU-R16-4329 \
+  --restart unless-stopped \
+  birkan-bandwidth-prediction
+```
+
+```
+docker run -d \
+  --gpus all \
+  --name HAW-Stecknitz \
+  --env router=HAW-Stecknitz \
+  --restart unless-stopped \
+  birkan-bandwidth-prediction
+```
+
+```
+docker run -d \
+  --gpus all \
+  --name HAW-Nobiskrug \
+  --env router=HAW-Nobiskrug \
+  --restart unless-stopped \
+  birkan-bandwidth-prediction
+```
+
+```
+docker run -d \
+  --gpus all \
+  --name 5G-D2-WAVELAB \
   --env router=5G-D2-WAVELAB \
   --restart unless-stopped \
   birkan-bandwidth-prediction

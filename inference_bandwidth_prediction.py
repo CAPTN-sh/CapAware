@@ -62,6 +62,14 @@ def process_data(data):
 
     basic_band_name = data['lte']['lPrimaryBand'].split('@')[0]
 
+    # hacky workaround to map n1 to n3
+    # n1 is not in the master list of bands in the training data, but n3 is
+    # they have similar characteristics (e.g., FDD)
+    # n3 goes into the model
+    # in the prediction part below, we only check if the live incoming data has n1 and adjust the prediction accordingly
+    if basic_band_name == 'n1':
+        basic_band_name = 'n3'
+
     ohe_encoded_band = ohe.transform([[basic_band_name]])  # shape (1, n_cols)
 
     signal_strengths = np.array([sinr, cqi, rsrp], dtype=np.float32)
@@ -90,8 +98,18 @@ def on_message(client, userdata, msg):
     try:
         # Parse and preprocess the data
         data = json.loads(msg.payload.decode('utf-8'))
-        processed_data = process_data(data)
-        buffer.append(processed_data)
+
+        # make sure the connection is 5G SA
+        # the model is only trained on 5G SA data
+        if data['lte']['lDataClass'] == '5G SA':
+            print(f"Received 5G SA data: {data}")
+            processed_data = process_data(data)
+            buffer.append(processed_data)
+        else:
+            print(f"Received non-5G SA data: {data}")
+            # clear buffer and start over when we receive non-5G SA data
+            buffer.clear()
+            return
 
         # Make predictions only if the buffer is full
         if len(buffer) == BUFFER_LENGHT:
@@ -111,12 +129,35 @@ def on_message(client, userdata, msg):
             
             bandwidth = float(real_values[0][0]) / (1000 * 1000)
             
+
+            # hacky workaround to adjust predictions for Telekom 5G SA with n78 at 90 MHz
+            # training data was for Vodafone 5G SA with n78 at 80 MHz
+            if data['identity'] == 'CAU-R16-4329' and data['lte']['lPrimaryBand'].split('@')[0] == 'n78':
+                # CAU-R16-4329 (Telekom 5G SA)  uses n78 at 90 MHz with 245 PRBs
+                # CAU-R16-4312 (Vodafone 5G SA) uses n78 at 80 MHz with 217 PRBs
+                # Thus, we can scale up the prediction by 245/217 = 1.12903226
+                bandwidth = bandwidth * (245/217)
+
+            # hacky workaround to adjust predictions for Telekom 5G SA with n1 at 20 MHz
+            # training data was for Vodafone 5G SA with n3 at 25 MHz
+            elif data['identity'] == 'CAU-R16-4329' and data['lte']['lPrimaryBand'].split('@')[0] == 'n1':
+                # CAU-R16-4329 (Telekom 5G SA)  uses n1 at 20 MHz with 106 PRBs
+                # CAU-R16-4312 (Vodafone 5G SA) uses n3 at 25 MHz with 133 PRBs
+                # Thus, we can scale down the prediction by 106/133 = 1.25471698
+                bandwidth = bandwidth * (106/133)
+
+            used_bandwidth = float(data['lte']['ltxbitspersecond']) / (1000 * 1000)
+
+            bandwidth = round(bandwidth, 2)
+            used_bandwidth = round(used_bandwidth, 2)
+            
             result = {
                 'identity': data['identity'],
                 'time': data['time'],
                 'version': model_checkpoint_version,
+                'operator': data['lte']['lCurrentOperator'],
                 'predicted_bandwidth': bandwidth,
-                'used_bandwidth': float(data['lte']['ltxbitspersecond']) / (1000 * 1000),
+                'used_bandwidth': used_bandwidth,
             }
 
             result_json = json.dumps(result)
